@@ -1,0 +1,12 @@
+# System #
+**/.DS_Store
+
+# Cache #
+**/__pycache__/
+
+# Music folder #
+music/*
+
+# Music files #
+*.dsd
+*.dff
