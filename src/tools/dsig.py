@@ -18,4 +18,3 @@ class DeltaSigma:
             bitstream[i] = 1 if self.quant==1 else 0
 
         return np.packbits([int(b) for b in bitstream.astype(np.uint8)])
-    
