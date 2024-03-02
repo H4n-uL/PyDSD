@@ -30,7 +30,7 @@ class dsd:
         return None
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Fourier Analogue-in-Digital Codec')
+    parser = argparse.ArgumentParser(description='PyDSD Encoder')
     parser.add_argument('input',                                                    help='Input file path')
     parser.add_argument('-o', '--output', '--out', '--output_file', required=False, help='Output file path')
     parser.add_argument('-m', '--mult', '--multipler',              required=False, help='DSD Sample rate multiplier')

@@ -20,4 +20,6 @@ class build:
             b'DSD ' + struct.pack('>Q', datalen)
         )
 
+        HEAD[4:12] = struct.pack('>Q', datalen+len(HEAD))
+
         return HEAD
