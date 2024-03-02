@@ -12,7 +12,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     file_path = args.input
-    if args.output is not None: pcm = open(args.output, 'wb')
     
     with open(file_path, 'rb') as dsd:
         frm8 = dsd.read(32)
@@ -39,16 +38,20 @@ if __name__ == '__main__':
             
             pipe = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
-        BUFFER_SIZE = 262144
+        BUFFER_SIZE = 2048
         
-        dsd.read(12)
+        dlen = struct.unpack('>Q', dsd.read(12)[4:])[0]
         stream = sd.OutputStream(samplerate=352800, channels=channels)
         stream.start()
 
         delta_sigma = [DeltaSigma() for _ in range(channels)]
+        offset=0
         while True:
-            block = dsd.read(BUFFER_SIZE*channels)
+            if dlen+BUFFER_SIZE < offset: block = dsd.read((dlen-offset)*channels)
+            else: block = dsd.read(BUFFER_SIZE*channels)
             if not block: break
+            print(dlen, offset)
+            offset += len(block)
             block = np.frombuffer(block, dtype=np.uint8).reshape(-1, channels)
             block = np.column_stack([delta_sigma[c].demodulator(block[:, c]) for c in range(channels)])
 
@@ -57,3 +60,5 @@ if __name__ == '__main__':
                 pipe.stdin.write(block.newbyteorder('<').tobytes())
             else:
                 stream.write(block.astype(np.float32))
+            
+            if dlen == offset: break
