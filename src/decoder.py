@@ -8,10 +8,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyDSD Decoder')
     parser.add_argument('input',                                                    help='Input file path')
     parser.add_argument('-o', '--output', '--out', '--output_file', required=False, help='Output file path')
-    parser.add_argument('-m', '--mult', '--multipler',              required=False, help='DSD Sample rate multiplier')
     args = parser.parse_args()
 
     file_path = args.input
+    if args.output is not None: pcm = open(args.output, 'wb')
     
     with open(file_path, 'rb') as dsd:
         frm8 = dsd.read(32)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
             block = np.column_stack([resample_poly(delta_sigma[c].demodulator(block[:, c]),up=1,down=8) for c in range(channels)])
 
             play=True
-            if play:
+            if args.output is not None:
+                pcm.write(np.int32(np.clip(block, -1, 1)*np.iinfo(np.int32).max))
+            else:
                 stream.write(block.astype(np.float32))
-            # else:
-            #     pcm.write(block.tobytes())
