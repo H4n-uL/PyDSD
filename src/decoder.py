@@ -1,4 +1,5 @@
-import argparse, struct
+import argparse, struct, subprocess
+from common import variables
 from scipy.signal import resample_poly
 import numpy as np
 from tools.dsig import DeltaSigma
@@ -21,6 +22,23 @@ if __name__ == '__main__':
         sample_rate = struct.unpack('>I', prop[fs+8:fs+12])[0]
         channels = struct.unpack('>H', prop[chnl+8:chnl+10])[0]
 
+        if args.output is not None:
+            command = [
+                variables.ffmpeg, '-y',
+                '-v', 'quiet',
+                '-f', 'f64le',
+                '-ar', str(sample_rate),
+                '-ac', str(channels),
+                '-i', 'pipe:0',
+                '-ar', str(352800),
+                '-f', 'f64le',
+                # '-c:a', 'flac',
+                # '-sample_fmt', 's32',
+                args.output#+'.flac'
+            ]
+            
+            pipe = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
         BUFFER_SIZE = 262144
         
         dsd.read(12)
@@ -32,10 +50,10 @@ if __name__ == '__main__':
             block = dsd.read(BUFFER_SIZE*channels)
             if not block: break
             block = np.frombuffer(block, dtype=np.uint8).reshape(-1, channels)
-            block = np.column_stack([resample_poly(delta_sigma[c].demodulator(block[:, c]),up=1,down=8) for c in range(channels)])
+            block = np.column_stack([delta_sigma[c].demodulator(block[:, c]) for c in range(channels)])
 
             play=True
             if args.output is not None:
-                pcm.write(np.int32(np.clip(block, -1, 1)*np.iinfo(np.int32).max))
+                pipe.stdin.write(block.newbyteorder('<').tobytes())
             else:
                 stream.write(block.astype(np.float32))
