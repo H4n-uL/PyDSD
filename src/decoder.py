@@ -30,10 +30,10 @@ if __name__ == '__main__':
                 '-ac', str(channels),
                 '-i', 'pipe:0',
                 '-ar', str(352800),
-                '-f', 'f64le',
-                # '-c:a', 'flac',
-                # '-sample_fmt', 's32',
-                args.output#+'.flac'
+                # '-f', 'f64le',
+                '-c:a', 'flac',
+                '-sample_fmt', 's32',
+                args.output+'.flac'
             ]
             
             pipe = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -47,18 +47,17 @@ if __name__ == '__main__':
         delta_sigma = [DeltaSigma() for _ in range(channels)]
         offset=0
         while True:
-            if dlen < offset+BUFFER_SIZE: block = dsd.read((dlen-offset)*channels)
+            if dlen < offset+BUFFER_SIZE*channels: block = dsd.read((dlen-offset)*channels)
             else: block = dsd.read(BUFFER_SIZE*channels)
             if not block: break
-            print(dlen, offset)
             offset += len(block)
             block = np.frombuffer(block, dtype=np.uint8).reshape(-1, channels)
-            block = np.column_stack([delta_sigma[c].demodulator(block[:, c]) for c in range(channels)])
+            block = np.column_stack([(np.unpackbits(block[:, c]).astype(np.float64)-0.5)*2 for c in range(channels)])
 
             play=True
             if args.output is not None:
                 pipe.stdin.write(block.newbyteorder('<').tobytes())
             else:
-                stream.write(block.astype(np.float32))
+                stream.write(resample_poly(block,up=1,down=8).astype(np.float32))
             
             if dlen == offset: break
