@@ -47,7 +47,7 @@ if __name__ == '__main__':
         delta_sigma = [DeltaSigma() for _ in range(channels)]
         offset=0
         while True:
-            if dlen < offset+BUFFER_SIZE*channels: block = dsd.read((dlen-offset)*channels)
+            if dlen < offset+BUFFER_SIZE*channels: block = dsd.read(dlen-offset)
             else: block = dsd.read(BUFFER_SIZE*channels)
             if not block: break
             offset += len(block)
