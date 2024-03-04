@@ -2,7 +2,6 @@ import argparse, struct, subprocess
 from common import variables
 from scipy.signal import resample_poly
 import numpy as np
-from tools.dsig import DeltaSigma
 import sounddevice as sd
 
 if __name__ == '__main__':
@@ -44,7 +43,6 @@ if __name__ == '__main__':
         stream = sd.OutputStream(samplerate=352800, channels=channels)
         stream.start()
 
-        delta_sigma = [DeltaSigma() for _ in range(channels)]
         offset=0
         while True:
             if dlen < offset+BUFFER_SIZE*channels: block = dsd.read(dlen-offset)
