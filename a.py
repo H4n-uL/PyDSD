@@ -1,7 +1,15 @@
+import struct
+
 with open('input.dsd', 'rb') as f_in, open('dsd.pcm', 'wb') as f_out:
-    f_in.seek(130)
-    while True:
-        by = [f_in.read(1), f_in.read(1)]
+    frm8 = f_in.read(32)
+    proplen = struct.unpack('>Q', f_in.read(12)[4:])[0]
+    prop = f_in.read(proplen)
+    fs, chnl = prop.find(b'FS  ')+4, prop.find(b'CHNL')+4
+    sample_rate = struct.unpack('>I', prop[fs+8:fs+12])[0]
+    channels = struct.unpack('>H', prop[chnl+8:chnl+10])[0]
+    dlen = struct.unpack('>Q', f_in.read(12)[4:])[0]
+    for _ in range(0, dlen, channels):
+        by = [f_in.read(1) for _ in range(channels)]
         if not by[0] or not by[1]:
             break
         bits = [bin(int.from_bytes(byte, "big"))[2:].zfill(8) for byte in by]

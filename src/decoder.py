@@ -38,7 +38,7 @@ if __name__ == '__main__':
             pipe = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
         BUFFER_SIZE = 2048
-        
+
         dlen = struct.unpack('>Q', dsd.read(12)[4:])[0]
         stream = sd.OutputStream(samplerate=352800, channels=channels)
         stream.start()
