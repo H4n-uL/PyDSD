@@ -13,8 +13,7 @@ class DeltaSigma:
 
         for i in range(len(x)):
             self.intg[0] += x[i] - self.quant
-            for j in range(1, self.deg):
-                self.intg[j] += self.intg[j-1] - self.quant
+            self.intg[1:] = [self.intg[j] + self.intg[j-1] - self.quant for j in range(1, self.deg)]
             self.quant = 1 if self.intg[-1] > 0 else -1
             bitstream[i] = 1 if self.quant==1 else 0
 

@@ -1,4 +1,4 @@
-import argparse, os, json, subprocess
+import argparse, os, json, subprocess, shutil
 from common import variables
 import numpy as np
 from tools.dsig import DeltaSigma
@@ -34,6 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('input',                                                    help='Input file path')
     parser.add_argument('-o', '--output', '--out', '--output_file', required=False, help='Output file path')
     parser.add_argument('-m', '--mult', '--multipler',              required=False, help='DSD Sample rate multiplier')
+    parser.add_argument('-p', '--pres', '--preserve',               action='store_true', help='Preserve bitstream')
     args = parser.parse_args()
 
     file_path = args.input
@@ -87,4 +88,5 @@ if __name__ == '__main__':
         h = build.dff_header(dlen, chb, dsd_srate)
         with open(out, 'wb') as f, open(variables.temp_dsd, 'rb') as temp:
             f.write(h + temp.read())
-        os.remove(variables.temp_dsd)
+        if args.pres: os.remove(variables.temp_dsd)
+        else: shutil.move(variables.temp_dsd, f'{out}.bitstream')
