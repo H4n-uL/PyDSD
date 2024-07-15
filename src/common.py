@@ -1,4 +1,7 @@
-import base64, os, platform, secrets
+import base64, os, platform, secrets, subprocess, sys
+
+directory = os.path.dirname(os.path.realpath(__file__))
+res = os.path.join(directory, 'res')
 
 class variables:
     directory = os.path.dirname(os.path.realpath(__file__))
@@ -10,12 +13,16 @@ class variables:
     oper = platform.uname()
     arch = platform.machine().lower()
 
-    if oper.system == 'Windows' and arch in ['amd64', 'x86_64']:
-        ffmpeg =      os.path.join(directory, 'res', 'ffmpeg.Windows')
-    elif oper.system == 'Darwin':
-        ffmpeg =      os.path.join(directory, 'res', 'ffmpeg.macOS')
-    else:
-        if arch in ['amd64', 'x86_64']:
-            ffmpeg =  os.path.join(directory, 'res', 'ffmpeg.AMD64')
-        if arch == 'arm64':
-            ffmpeg =  os.path.join(directory, 'res', 'ffmpeg.AArch64')
+    resfiles = lambda x: [f for f in os.listdir(res) if x in f]
+    try:    ffmpeg  = os.path.join(res, resfiles('ffmpeg')[0])
+    except: ffmpeg  = 'ffmpeg'
+    try:    ffprobe = os.path.join(res, resfiles('ffprobe')[0])
+    except: ffprobe = 'ffprobe'
+
+    try:
+        subprocess.run([ffmpeg,  '-version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([ffprobe, '-version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except FileNotFoundError:
+        print('Error: ffmpeg or ffprobe not found. Please install and try again,')
+        print(f'or download and put them in {res}')
+        sys.exit(1)

@@ -44,7 +44,7 @@ if __name__ == '__main__':
     if not (out.lower().endswith('.dsd') or out.lower().endswith('.dff')):
         out += '.dsd'
 
-    if args.mult is not None and args.mult in '64 128 256 512 1024'.split():
+    if args.mult is not None and args.mult in '1 2 4 8 16 32 64 128 256 512 1024'.split():
         dsd_srate = 44100 * int(args.mult)
     else: dsd_srate = 2822400
 
